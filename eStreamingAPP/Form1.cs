@@ -1,21 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-//using System.ComponentModel;
-//using System.Data;
-//using System.Drawing;
-//using System.Linq;
 using System.Text;
-//using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net;
 using System.IO;
-//using System.IO.Compression;
-//using System.Runtime.Serialization;
-//using System.Runtime.Serialization.Json;
 using System.Web.Script.Serialization;
 using ICSharpCode.SharpZipLib.GZip;
-//using Newtonsoft.Json;
-//using Newtonsoft.Json.Linq;
 using System.Threading;
 
 namespace eStreamingAPP
@@ -25,15 +15,7 @@ namespace eStreamingAPP
         public Form1()
         {
             InitializeComponent();
-            //string setTypeOfSearch;
-
-            // comboBox1.Items.Add("Direct");
-            //comboBox1.Items.Add("Connected");
-            //comboBox1.SelectedIndex = 0;
-            // textBox2.Visible = false;
-            //this.Height -= 100;
-
-            
+          
 
     }
         private Thread t;
@@ -44,7 +26,7 @@ namespace eStreamingAPP
             MemoryStream memStream = new MemoryStream(bytes);
             GZipInputStream gzipStream = new GZipInputStream(memStream);
             byte[] data = new byte[2048];
-            char[] chars = new char[2048]; // must be at least as big as 'data'
+            char[] chars = new char[2048]; 
             Decoder decoder = Encoding.UTF8.GetDecoder();
             StringBuilder sb = new StringBuilder();
 
@@ -67,18 +49,15 @@ namespace eStreamingAPP
             // Stazeni JSONu
             //-------------------------------
             dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Rows.Clear(); });
-            //dataGridView1.Rows.Clear();
-            // textBox5.Text = "Retrieving and decompressing data";
             textBox5.Invoke((MethodInvoker)delegate { textBox5.Text = "Retrieving and decompressing data"; });
 
             try
             {
                 WebClient webClient = new WebClient();
-                //webClient.Headers.Add("AuthToken", "6138896039ca497acfbee3cc44ea4ec572267ac0");
                 webClient.Headers.Add("AuthToken", textBox4.Text);
                 string result = webClient.DownloadString("https://api.travelcloudpro.eu/v1/cache/flyfrom?origin=" + textBox3.Text + "&pointOfSale=" + textBox1.Text);
 
-                // Demo: https://demo.travelcloudpro.eu/v1/flyfrom?origin=  6138896039ca497acfbee3cc44ea4ec572267ac0
+                // Demo: https://demo.travelcloudpro.eu/v1/flyfrom?origin=  
                 // Prod: https://api.travelcloudpro.eu/v1/cache/flyfrom?origin=
 
 
@@ -101,7 +80,6 @@ namespace eStreamingAPP
                 //-------------------------------
                 string decompressedData = Decompress(dataSource);
                 dataSource = "";
-                //textBox2.Text = decompressedData;
 
 
                 //-------------------------------
@@ -109,9 +87,6 @@ namespace eStreamingAPP
                 //-------------------------------
 
                 var serializer = new JavaScriptSerializer();
-                // dynamic jsonObject = serializer.Deserialize<dynamic>(decompressedData);
-
-                //JavaScriptSerializer serializer1 = new JavaScriptSerializer();
                 dynamic item = serializer.Deserialize<object>(decompressedData);
 
                 string setTypeOfSearch = "Direct";
@@ -121,18 +96,6 @@ namespace eStreamingAPP
 
 
                     dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.ColumnCount = 9;});
-                    // dataGridView1.ColumnCount = 9;
-
-
-                    //dataGridView1.Columns[0].Name = "FlightType";
-                    //dataGridView1.Columns[1].Name = "PointOfSale";
-                    //dataGridView1.Columns[2].Name = "Origin";
-                    //dataGridView1.Columns[3].Name = "Destination";
-                    //dataGridView1.Columns[4].Name = "DepartureDate";
-                    //dataGridView1.Columns[5].Name = "ReturnDate";
-                    //dataGridView1.Columns[6].Name = "PlatingCarrier";
-                    //dataGridView1.Columns[7].Name = "Amount";
-                    //dataGridView1.Columns[8].Name = "Currency";
 
                     dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[0].Name = "FlightType"; });
                     dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[1].Name = "PointOfSale"; });
@@ -150,8 +113,6 @@ namespace eStreamingAPP
                     while (pocetRadku < pocetRadku + 1)
                     {
 
-
-                        // setTypeOfSearch = "Connected";
 
                         try
                         {
@@ -180,14 +141,10 @@ namespace eStreamingAPP
                         string direct_platingCarrier = (item[pocetRadku][setTypeOfSearch]["platingCarrier"]);
                         decimal direct_amount = (item[pocetRadku][setTypeOfSearch]["amount"]);
 
-                        //string[] row = new string[] { flightType, pointOfSale, origin, destination, direct_departureDate, direct_returnDate, direct_platingCarrier, direct_amount.ToString(), direct_currency };
-                        //dataGridView1.Rows.Add(row);
-                        //dataGridView1.Rows.Add(flightType, pointOfSale, origin, destination, direct_departureDate, direct_returnDate, direct_platingCarrier, direct_amount, direct_currency);
-                        dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Rows.Add(flightType, pointOfSale, origin, destination, direct_departureDate, direct_returnDate, direct_platingCarrier, direct_amount, direct_currency); });
+                              dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Rows.Add(flightType, pointOfSale, origin, destination, direct_departureDate, direct_returnDate, direct_platingCarrier, direct_amount, direct_currency); });
 
                         dataGridView1.Invoke((MethodInvoker)delegate { textBox2.Text = (pocetRadku+1).ToString(); });
 
-                        //textBox2.Text = pocetRadku.ToString();
                         pocetRadku++;
 
                     }
@@ -197,14 +154,11 @@ namespace eStreamingAPP
 
                 catch 
                 {
-                    //dataGridView1.Rows.Add("End");
-                    //MessageBox.Show(ex.ToString());
-                    //dataGridView1.Sort(dataGridView1.Columns[7], System.ComponentModel.ListSortDirection.Ascending);
+
                     dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Sort(dataGridView1.Columns[7], System.ComponentModel.ListSortDirection.Ascending); });
 
                     dataGridView1.Invoke((MethodInvoker)delegate { textBox5.Text = "Completed"; });
-                    //textBox5.Text = "Completed";
-                    //button3.Invoke((MethodInvoker)delegate { button3.Enabled = Enabled; });
+
                     
 
                 }
@@ -258,7 +212,7 @@ namespace eStreamingAPP
             try
             {
                 WebClient webClient = new WebClient();
-                //webClient.Headers.Add("AuthToken", "6138896039ca497acfbee3cc44ea4ec572267ac0");
+
                 webClient.Headers.Add("AuthToken", textBox4.Text);
                 string result = webClient.DownloadString("https://api.travelcloudpro.eu/v1/cache/flyfrom?origin=" + textBox3.Text + "&pointOfSale=" + textBox1.Text);
 
@@ -292,9 +246,7 @@ namespace eStreamingAPP
                 //-------------------------------
 
                 var serializer = new JavaScriptSerializer();
-                // dynamic jsonObject = serializer.Deserialize<dynamic>(decompressedData);
 
-                //JavaScriptSerializer serializer1 = new JavaScriptSerializer();
                 dynamic item = serializer.Deserialize<object>(decompressedData);
 
                 string setTypeOfSearch = "Direct";
