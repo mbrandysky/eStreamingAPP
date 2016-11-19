@@ -7,6 +7,7 @@ using System.IO;
 using System.Web.Script.Serialization;
 using ICSharpCode.SharpZipLib.GZip;
 using System.Threading;
+using System.ComponentModel;
 
 namespace eStreamingAPP
 {
@@ -67,13 +68,11 @@ namespace eStreamingAPP
                 //-------------------------------
                 var jss = new JavaScriptSerializer();
                 var dict = jss.Deserialize<Dictionary<string, dynamic>>(result);
-                result = "";
 
                 //-------------------------------
                 // Vytazeni informace z JSONu
                 //-------------------------------
                 string dataSource = (dict["data"]["base64GzippedResponse"]);
-                //textBox1.Text = dataSource;
 
                 //-------------------------------
                 // Decompress(dataSource);
@@ -81,88 +80,76 @@ namespace eStreamingAPP
                 string decompressedData = Decompress(dataSource);
                 dataSource = "";
 
-
                 //-------------------------------
                 //Deserializace JSONu
                 //-------------------------------
-
                 var serializer = new JavaScriptSerializer();
                 dynamic item = serializer.Deserialize<object>(decompressedData);
 
-                string setTypeOfSearch = "Direct";
+                int resultCount = 0;
 
-                try
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.ColumnCount = 9; });
+
+
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[0].Name = "Price"; });
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[1].Name = "Currency"; });
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[2].Name = "From"; });
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[3].Name = "To"; });
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[4].Name = "There"; });
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[5].Name = "Back"; });
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[6].Name = "Carrier"; });
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[7].Name = "Last modified"; });
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[7].Width = 160; });
+
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[8].Name = "Age in hours"; });
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[8].Width = 90; });
+
+      
+                string flightTypeCheckBox = "RT_Connected";
+                if (checkBox1.Checked)
+                { flightTypeCheckBox = "OW_Connected"; }
+                
+                foreach (string keyDestIATA in item.Keys)
                 {
 
-
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.ColumnCount = 9;});
-
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[0].Name = "FlightType"; });
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[1].Name = "PointOfSale"; });
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[2].Name = "Origin"; });
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[3].Name = "Destination"; });
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[4].Name = "DepartureDate"; });
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[5].Name = "ReturnDate"; });
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[6].Name = "PlatingCarrier"; });
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[7].Name = "Amount"; });
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[8].Name = "Currency"; });
-
-
-
-                    int pocetRadku = 0;
-                    while (pocetRadku < pocetRadku + 1)
+                    foreach (string keyFlightType in item[keyDestIATA].Keys)
                     {
-
-
-                        try
+                        
+                        if (keyFlightType == flightTypeCheckBox)
+                            
                         {
+                            string lastModifiedCell = (item[keyDestIATA][keyFlightType]["lastModified"]);
+                            decimal recordAgeInMsCell = (item[keyDestIATA][keyFlightType]["recordAgeInMs"]) / 3600000;
+                            decimal amountCell = (item[keyDestIATA][keyFlightType]["amount"]);
+                            string currencyCell = (item[keyDestIATA][keyFlightType]["currency"]);
+                            string validatingCarrierCell = (item[keyDestIATA][keyFlightType]["validatingCarrier"]);
+                            string originalRequest = (item[keyDestIATA][keyFlightType]["originalRequest"]);
 
-                            if ((item[pocetRadku]["Direct"]) != null)
-                            { setTypeOfSearch = "Direct"; }
+                            string departureDateCell = originalRequest.Substring(0, 8);
+
+                            string destinationDateCell = " ";
+                            if (flightTypeCheckBox == "RT_Connected")
+                            { destinationDateCell = originalRequest.Substring(14, 8); }
+
+                            string departureIATACell = originalRequest.Substring(8, 3);
+                            string destinationIATACell = originalRequest.Substring(11, 3);
+
+                            dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Rows.Add(amountCell, currencyCell, departureIATACell, destinationIATACell,
+                            departureDateCell, destinationDateCell, validatingCarrierCell, lastModifiedCell, recordAgeInMsCell); });
+
+                            resultCount++;
+
+                            
+                            textBox2.Invoke((MethodInvoker)delegate { textBox2.Text = resultCount.ToString(); });
 
                         }
-                        catch
-                        {
-
-                            setTypeOfSearch = "Connected";
-
-
-                        }
-
-
-                        string pointOfSale = (item[pocetRadku]["pointOfSale"]);
-                        string origin = (item[pocetRadku]["origin"]);
-                        string destination = (item[pocetRadku]["destination"]);
-
-                        string flightType = setTypeOfSearch;
-                        string direct_departureDate = (item[pocetRadku][setTypeOfSearch]["departureDate"]);
-                        string direct_returnDate = (item[pocetRadku][setTypeOfSearch]["returnDate"]);
-                        string direct_currency = (item[pocetRadku][setTypeOfSearch]["currency"]);
-                        string direct_platingCarrier = (item[pocetRadku][setTypeOfSearch]["platingCarrier"]);
-                        decimal direct_amount = (item[pocetRadku][setTypeOfSearch]["amount"]);
-
-                              dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Rows.Add(flightType, pointOfSale, origin, destination, direct_departureDate, direct_returnDate, direct_platingCarrier, direct_amount, direct_currency); });
-
-                        dataGridView1.Invoke((MethodInvoker)delegate { textBox2.Text = (pocetRadku+1).ToString(); });
-
-                        pocetRadku++;
 
                     }
 
-
                 }
 
-                catch 
-                {
-
-                    dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Sort(dataGridView1.Columns[7], System.ComponentModel.ListSortDirection.Ascending); });
-
-                    dataGridView1.Invoke((MethodInvoker)delegate { textBox5.Text = "Completed"; });
-
-                    
-
-                }
-
+                textBox5.Invoke((MethodInvoker)delegate { textBox5.Text = "Completed"; });
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Sort(dataGridView1.Columns[0], ListSortDirection.Ascending); });
 
             }
             catch (Exception exc)
@@ -182,9 +169,6 @@ namespace eStreamingAPP
 
                 }
 
-
-
-
             }
 
 
@@ -193,165 +177,7 @@ namespace eStreamingAPP
 
         }
 
-
-
-
-
-
-
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            //-------------------------------
-            // Stazeni JSONu
-            //-------------------------------
-
-            dataGridView1.Rows.Clear();
-            textBox5.Text = "Retrieving and decompressing data";
-
-            try
-            {
-                WebClient webClient = new WebClient();
-
-                webClient.Headers.Add("AuthToken", textBox4.Text);
-                string result = webClient.DownloadString("https://api.travelcloudpro.eu/v1/cache/flyfrom?origin=" + textBox3.Text + "&pointOfSale=" + textBox1.Text);
-
-                // Demo: https://demo.travelcloudpro.eu/v1/flyfrom?origin=
-  
-
-
-                //-------------------------------
-                // Deserializace JSONu
-                //-------------------------------
-                var jss = new JavaScriptSerializer();
-                var dict = jss.Deserialize<Dictionary<string, dynamic>>(result);
-                result = "";
-
-                //-------------------------------
-                // Vytazeni informace z JSONu
-                //-------------------------------
-                string dataSource = (dict["data"]["base64GzippedResponse"]);
-                //textBox1.Text = dataSource;
-
-                //-------------------------------
-                // Decompress(dataSource);
-                //-------------------------------
-                string decompressedData = Decompress(dataSource);
-                dataSource = "";
-                //textBox2.Text = decompressedData;
-
-
-                //-------------------------------
-                //Deserializace JSONu
-                //-------------------------------
-
-                var serializer = new JavaScriptSerializer();
-
-                dynamic item = serializer.Deserialize<object>(decompressedData);
-
-                string setTypeOfSearch = "Direct";
-
-                try
-                {
-                    
-
-
-                    dataGridView1.ColumnCount = 9;
-
-
-                    dataGridView1.Columns[0].Name = "FlightType";
-                    dataGridView1.Columns[1].Name = "PointOfSale";
-                    dataGridView1.Columns[2].Name = "Origin";
-                    dataGridView1.Columns[3].Name = "Destination";
-                    dataGridView1.Columns[4].Name = "DepartureDate";
-                    dataGridView1.Columns[5].Name = "ReturnDate";
-                    dataGridView1.Columns[6].Name = "PlatingCarrier";
-                    dataGridView1.Columns[7].Name = "Amount";
-                    dataGridView1.Columns[8].Name = "Currency";
-
-
-
-
-                    int pocetRadku = 0;
-                    while (pocetRadku < pocetRadku + 1)
-                    {
-
-
-                        // setTypeOfSearch = "Connected";
-
-                        try
-                            {
-
-                                if ((item[pocetRadku]["Direct"]) != null)
-                                { setTypeOfSearch = "Direct"; }
-
-                            }
-                            catch
-                            {
-
-                            setTypeOfSearch = "Connected";
-
-
-                        }
-
-
-                                string pointOfSale = (item[pocetRadku]["pointOfSale"]);
-                                string origin = (item[pocetRadku]["origin"]);
-                                string destination = (item[pocetRadku]["destination"]);
-
-                                string flightType = setTypeOfSearch;
-                                string direct_departureDate = (item[pocetRadku][setTypeOfSearch]["departureDate"]);
-                                string direct_returnDate = (item[pocetRadku][setTypeOfSearch]["returnDate"]);
-                                string direct_currency = (item[pocetRadku][setTypeOfSearch]["currency"]);
-                                string direct_platingCarrier = (item[pocetRadku][setTypeOfSearch]["platingCarrier"]);
-                                decimal direct_amount = (item[pocetRadku][setTypeOfSearch]["amount"]);
-
-                                //string[] row = new string[] { flightType, pointOfSale, origin, destination, direct_departureDate, direct_returnDate, direct_platingCarrier, direct_amount.ToString(), direct_currency };
-                                //dataGridView1.Rows.Add(row);
-                                dataGridView1.Rows.Add(flightType, pointOfSale, origin, destination, direct_departureDate, direct_returnDate, direct_platingCarrier, direct_amount, direct_currency);
-
-                        textBox2.Text = pocetRadku.ToString();
-                        pocetRadku++;
-
-                    }
-        
-
-                }
-
-                catch 
-                {
-                    //dataGridView1.Rows.Add("End");
-                    //MessageBox.Show(ex.ToString());
-                    dataGridView1.Sort(dataGridView1.Columns[7], System.ComponentModel.ListSortDirection.Ascending);
-                    textBox5.Text = "Completed";
-
-                }
-
-
-            }
-            catch (Exception exc)
-            {
-                if ((exc.ToString().Contains("401")) || (exc.ToString().Contains("403")) )
-                {
-
-                    MessageBox.Show("You are not authorized");
-
-                }
-
-
-                else
-                {
-
-                    MessageBox.Show("Nothing to display");
-
-                }
-                
-
-
-
-            }
-        }
-            
+     
         
 
 
@@ -449,6 +275,11 @@ namespace eStreamingAPP
         }
 
         private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
 
         }

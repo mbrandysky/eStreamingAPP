@@ -87,6 +87,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="ClassDiagram1.cd" />
     <None Include="Properties\DataSources\eStreamingAPP.Properties.Resources.datasource" />
     <None Include="Properties\DataSources\eStreamingAPP.Properties.Settings.datasource" />
     <None Include="Properties\DataSources\Form1.datasource" />
