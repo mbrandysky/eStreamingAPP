@@ -1,4 +1,6 @@
-﻿using System;
+﻿//Verze 1.2 (2.1.2017)
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
@@ -21,6 +23,8 @@ namespace eStreamingAPP
     }
         private Thread t;
 
+
+        // Dekomprese gzipovaných dat (pouzito dale v hlavnim programu)
         private string Decompress(string text)
         {
             Byte[] bytes = Convert.FromBase64String(text);
@@ -43,12 +47,11 @@ namespace eStreamingAPP
 
         }
 
-
+        //Hlavni beh programu
         public void VykonaniProgramu()
         {
-            //-------------------------------
-            // Stazeni JSONu
-            //-------------------------------
+            
+            // Priprava formulare a stazeni JSONu
             dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Rows.Clear(); });
             textBox5.Invoke((MethodInvoker)delegate { textBox5.Text = "Retrieving and decompressing data"; });
 
@@ -58,38 +61,30 @@ namespace eStreamingAPP
                 webClient.Headers.Add("AuthToken", textBox4.Text);
                 string result = webClient.DownloadString("https://api.travelcloudpro.eu/v1/cache/flyfrom?origin=" + textBox3.Text + "&pointOfSale=" + textBox1.Text);
 
-                // Demo: https://demo.travelcloudpro.eu/v1/flyfrom?origin=  
-                // Prod: https://api.travelcloudpro.eu/v1/cache/flyfrom?origin=
+                /* Poznámka:
+                    URL pro: https://demo.travelcloudpro.eu/v1/flyfrom?origin=  
+                    URL pro: https://api.travelcloudpro.eu/v1/cache/flyfrom?origin= */
 
-
-
-                //-------------------------------
                 // Deserializace JSONu
-                //-------------------------------
                 var jss = new JavaScriptSerializer();
                 var dict = jss.Deserialize<Dictionary<string, dynamic>>(result);
 
-                //-------------------------------
                 // Vytazeni informace z JSONu
-                //-------------------------------
                 string dataSource = (dict["data"]["base64GzippedResponse"]);
 
-                //-------------------------------
                 // Decompress(dataSource);
-                //-------------------------------
                 string decompressedData = Decompress(dataSource);
                 dataSource = "";
 
-                //-------------------------------
                 //Deserializace JSONu
-                //-------------------------------
                 var serializer = new JavaScriptSerializer();
                 dynamic item = serializer.Deserialize<object>(decompressedData);
 
                 int resultCount = 0;
 
-                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.ColumnCount = 9; });
 
+                //Priprava tabulky DataGridu
+                dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.ColumnCount = 9; });
 
                 dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[0].Name = "Price"; });
                 dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[1].Name = "Currency"; });
@@ -104,7 +99,7 @@ namespace eStreamingAPP
                 dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[8].Name = "Age in hours"; });
                 dataGridView1.Invoke((MethodInvoker)delegate { dataGridView1.Columns[8].Width = 90; });
 
-      
+                //Vyhodnoceni zda parsovat zpatecni, nebo jednosmerny let. Parsovani a zapis fo tabulky datagridu
                 string flightTypeCheckBox = "RT_Connected";
                 if (checkBox1.Checked)
                 { flightTypeCheckBox = "OW_Connected"; }
@@ -156,31 +151,22 @@ namespace eStreamingAPP
             {
                 if ((exc.ToString().Contains("401")) || (exc.ToString().Contains("403")))
                 {
-
                     MessageBox.Show("You are not authorized");
-
                 }
-
-
+                
                 else
                 {
-
                     MessageBox.Show("Nothing to display");
-
                 }
 
             }
 
-
             button3.Invoke((MethodInvoker)delegate { button3.Enabled = Enabled; });
-
 
         }
 
+
      
-        
-
-
         private void dataGridView1_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
         {
 
@@ -237,8 +223,6 @@ namespace eStreamingAPP
             
         }
 
-
-
         private void Form1_Load(object sender, EventArgs e)
         {
        
@@ -248,8 +232,6 @@ namespace eStreamingAPP
         {
 
         }
-
-
 
         private void textBox5_TextChanged(object sender, EventArgs e)
         {
@@ -268,6 +250,7 @@ namespace eStreamingAPP
 
         private void button3_Click(object sender, EventArgs e)
         {
+            //Spusteni a vykonani programu ve vlakne (aby nezamrzala aplikace)
             t = new Thread(VykonaniProgramu);
             t.Start();
             button3.Enabled = false;
