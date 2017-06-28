@@ -1,4 +1,4 @@
-﻿//Verze 1.2 (2.1.2017)
+﻿//Verze 1.3 (28.6.2017)
 
 using System;
 using System.Collections.Generic;
@@ -263,6 +263,11 @@ namespace eStreamingAPP
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
         {
 
         }
